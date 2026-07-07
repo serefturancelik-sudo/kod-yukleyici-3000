@@ -1,46 +1,29 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Kod Yükleyici 3000</title>
-</head>
-<body>
-    <h1>Kod Yükleyici 3000</h1>
-    <button id="connectBtn">Porta Bağlan</button>
-    <input type="text" id="commandInput" placeholder="Komut yaz...">
-    <button id="sendBtn">Gönder</button>
-    <div id="terminal" style="border:1px solid #000; height:200px; overflow-y:scroll;"></div>
+<select id="kartSec">
+    <option value="esp32">ESP32 (WROOM)</option>
+    <option value="arduino_uno">Arduino Uno</option>
+    <option value="atmega328pb">ATmega 328PB</option>
+</select>
 
-    <script>
-        let port;
-        const terminal = document.getElementById('terminal');
+<button id="baglanBtn">Bağlan & Eşle</button>
+<div id="durum">Durum: Bekliyor...</div>
 
-        document.getElementById('connectBtn').addEventListener('click', async () => {
-            // Seri port izin penceresini açar
-            port = await navigator.serial.requestPort();
-            await port.open({ baudRate: 115200 });
-            terminal.innerHTML += "Bağlantı sağlandı.<br>";
-            
-            // Veri okuma döngüsü
-            while (port.readable) {
-                const reader = port.readable.getReader();
-                try {
-                    while (true) {
-                        const { value, done } = await reader.read();
-                        if (done) break;
-                        terminal.innerHTML += new TextDecoder().decode(value) + "<br>";
-                    }
-                } finally {
-                    reader.releaseLock();
-                }
-            }
-        });
+<button onclick="setMode('text')">Python/C++</button>
+<button onclick="setMode('blockly')">mBlock (Blok)</button>
 
-        document.getElementById('sendBtn').addEventListener('click', async () => {
-            const writer = port.writable.getWriter();
-            const encoder = new TextEncoder();
-            await writer.write(encoder.encode(document.getElementById('commandInput').value + "\n"));
-            writer.releaseLock();
-        });
-    </script>
-</body>
-</html>
+<div id="terminal" style="background:black; color:lime; height:300px; overflow-y:scroll;"></div>
+
+<script>
+    // 1. Kart eşleme mantığı
+    document.getElementById('baglanBtn').onclick = async () => {
+        const port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 115200 });
+        document.getElementById('durum').innerText = "Bağlandı ve Eşlendi!";
+        // TX/RX işlemleri burada başlayacak
+    };
+
+    // 2. Mod değiştirme (Blok veya Kod)
+    function setMode(mode) {
+        console.log(mode + " moduna geçildi.");
+        // Burada blok editörünü veya metin editörünü aktif edeceksin
+    }
+</script>
